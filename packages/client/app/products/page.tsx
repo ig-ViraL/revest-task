@@ -2,28 +2,31 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   Grid, Typography, Button, Box, CircularProgress,
-  Chip, TextField, InputAdornment,
+  TextField, InputAdornment,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import { toast } from 'react-toastify';
 import { ProductCard } from '@/components/products/ProductCard';
 import { ProductForm } from '@/components/products/ProductForm';
+import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { api } from '@/lib/api';
+import { Product } from '@/types';
 
 export default function ProductsAdminPage() {
-  const [products, setProducts]       = useState<any[]>([]);
+  useRequireAuth();
+  const [products, setProducts]       = useState<Product[]>([]);
   const [loading, setLoading]         = useState(true);
   const [formOpen, setFormOpen]       = useState(false);
-  const [editProduct, setEditProduct] = useState<any>(null);
+  const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [search, setSearch]           = useState('');
 
   const load = useCallback(async () => {
     try {
       setLoading(true);
       setProducts(await api.products.list());
-    } catch (e: any) {
-      toast.error(e.message ?? 'Failed to load products');
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Failed to load products');
     } finally {
       setLoading(false);
     }
@@ -31,7 +34,7 @@ export default function ProductsAdminPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  const handleSave = useCallback(async (data: any) => {
+  const handleSave = useCallback(async (data: Partial<Product>) => {
     try {
       if (editProduct) {
         await api.products.update(editProduct.id, data);
@@ -43,8 +46,8 @@ export default function ProductsAdminPage() {
       setFormOpen(false);
       setEditProduct(null);
       await load();
-    } catch (e: any) {
-      toast.error(e.message ?? 'Save failed');
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Save failed');
     }
   }, [editProduct, load]);
 
@@ -53,8 +56,8 @@ export default function ProductsAdminPage() {
       await api.products.delete(id);
       toast.success('Product deleted');
       await load();
-    } catch (e: any) {
-      toast.error(e.message ?? 'Delete failed');
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Delete failed');
     }
   }, [load]);
 

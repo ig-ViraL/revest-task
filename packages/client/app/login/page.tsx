@@ -38,7 +38,7 @@ export default function LoginPage() {
     });
 
     if (result === 'registered') {
-      toast.success('Account created! Welcome to Revest 🎉');
+      toast.success('Account created! Welcome to revest.shop 🎉');
     } else {
       toast.success('Welcome back!');
     }
@@ -50,7 +50,7 @@ export default function LoginPage() {
       <Card sx={{ width: '100%', maxWidth: 480, boxShadow: 4 }}>
         <CardContent sx={{ p: 4 }}>
           <Typography variant="h5" fontWeight={700} color="primary" gutterBottom>
-            Welcome to Revest
+            Welcome to revest.shop
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             New here? We'll create your account. Already a member? Just sign in.

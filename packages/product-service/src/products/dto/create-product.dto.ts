@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, IsPositive, Min, IsUrl } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsPositive, Min, MaxLength, Matches } from 'class-validator';
 
 export class CreateProductDto {
   @IsString()
@@ -25,5 +25,9 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(2_000_000)
+  @Matches(/^(https?:\/\/|data:image\/(png|jpe?g|webp|gif);base64,)/, {
+    message: 'imageUrl must be an http(s) URL or a valid base64 image data URI',
+  })
   imageUrl?: string;
 }

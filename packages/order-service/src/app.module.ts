@@ -12,7 +12,7 @@ import { OrderItem } from './orders/entities/order-item.entity';
       type: 'better-sqlite3',
       database: 'order.sqlite',
       entities: [Order, OrderItem],
-      synchronize: true,
+      synchronize: process.env.NODE_ENV !== 'production',
     }),
     ClientsModule.register([
       {

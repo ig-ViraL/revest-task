@@ -1,0 +1,33 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "Full Name",
+      "fieldType": "TEXT",
+      "minLength": 1,
+      "maxLength": 100,
+      "required": true
+    },
+    {
+      "id": 3,
+      "name": "Phone",
+      "fieldType": "TEXT",
+      "maxLength": 15,
+      "required": false
+    },
+    {
+      "id": 6,
+      "name": "Gender",
+      "fieldType": "LIST",
+      "required": false,
+      "listOfValues1": ["Male", "Female", "Others"]
+    },
+    {
+      "id": 7,
+      "name": "Love React?",
+      "fieldType": "RADIO",
+      "required": false,
+      "listOfValues1": ["Yes", "No"]
+    }
+  ]
+}

@@ -27,3 +27,39 @@ export interface CartItem {
   category?: string;
   quantity: number;
 }
+
+export interface Product {
+  id: string;
+  name: string;
+  description?: string;
+  sku: string;
+  category?: string;
+  price: number;
+  stock: number;
+  imageUrl?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface OrderItem {
+  id: string;
+  productId: string;
+  productName: string;
+  imageUrl?: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
+
+export interface Order {
+  id: string;
+  status: OrderStatus;
+  totalAmount: number;
+  userEmail?: string;
+  address?: string;
+  items: OrderItem[];
+  createdAt: string;
+  updatedAt: string;
+}

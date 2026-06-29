@@ -36,13 +36,16 @@ export const DynamicForm = memo(function DynamicForm({
   const methods = useForm<FormValues>({ defaultValues });
   const { handleSubmit, watch, reset } = methods;
 
-  // Re-populate when initialValues change (e.g. profile loaded from auth)
+  // Re-populate when initialValues content changes (object identity changes on every render,
+  // so we compare serialised content via a ref to avoid running on every render)
+  const prevInitialRef = useRef('');
   useEffect(() => {
-    if (initialValues && Object.keys(initialValues).length > 0) {
-      reset({ ...buildDefaultValues(fields), ...initialValues });
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(initialValues)]);
+    if (!initialValues || !Object.keys(initialValues).length) return;
+    const key = JSON.stringify(initialValues);
+    if (key === prevInitialRef.current) return;
+    prevInitialRef.current = key;
+    reset({ ...buildDefaultValues(fields), ...initialValues });
+  }, [initialValues, fields, reset]);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   useEffect(() => {

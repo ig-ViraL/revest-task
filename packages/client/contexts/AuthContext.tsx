@@ -7,7 +7,7 @@ interface AuthState {
   currentUser: User | null | undefined; // undefined = still loading from localStorage
   login: (email: string, name: string, extra?: Record<string, unknown>) => 'registered' | 'logged_in';
   logout: () => void;
-  updateProfile: (updates: Partial<Pick<User, 'name' | 'phone'>>) => void;
+  updateProfile: (updates: Partial<Pick<User, 'name' | 'phone' | 'gender' | 'loveReact'>>) => void;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setCurrentUser(null);
   }, []);
 
-  const updateProfile = useCallback((updates: Partial<Pick<User, 'name' | 'phone'>>) => {
+  const updateProfile = useCallback((updates: Partial<Pick<User, 'name' | 'phone' | 'gender' | 'loveReact'>>) => {
     if (!currentUser) return;
     const updated = { ...currentUser, ...updates };
     const users = getUsers().map(u => u.id === updated.id ? updated : u);

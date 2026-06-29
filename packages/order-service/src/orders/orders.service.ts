@@ -24,9 +24,9 @@ export class OrdersService implements OnModuleInit {
   private productService: ProductGrpcService;
 
   constructor(
-    @InjectRepository(Order)   private readonly orderRepo: Repository<Order>,
+    @InjectRepository(Order)     private readonly orderRepo: Repository<Order>,
     @InjectRepository(OrderItem) private readonly itemRepo: Repository<OrderItem>,
-    @Inject('PRODUCT_PACKAGE') private readonly client: ClientGrpc,
+    @Inject('PRODUCT_PACKAGE')   private readonly client: ClientGrpc,
   ) {}
 
   onModuleInit() {
@@ -34,6 +34,7 @@ export class OrdersService implements OnModuleInit {
   }
 
   async create(dto: CreateOrderDto): Promise<Order> {
+    // 1. Validate availability for every item upfront
     for (const item of dto.items) {
       const avail = await firstValueFrom(
         this.productService.checkAvailability({ productId: item.productId, quantity: item.quantity }),
@@ -43,6 +44,7 @@ export class OrdersService implements OnModuleInit {
       }
     }
 
+    // 2. Fetch product details for denormalisation
     const productIds = dto.items.map(i => i.productId);
     const { products } = await firstValueFrom(
       this.productService.getProductsByIds({ ids: productIds }),
@@ -51,6 +53,7 @@ export class OrdersService implements OnModuleInit {
 
     const orderItems: Partial<OrderItem>[] = dto.items.map(item => {
       const product = productMap.get(item.productId);
+      if (!product) throw new BadRequestException(`Product ${item.productId} not found`);
       return {
         id:          uuidv4(),
         productId:   item.productId,
@@ -61,38 +64,40 @@ export class OrdersService implements OnModuleInit {
       };
     });
 
-    const totalAmount = orderItems.reduce(
-      (sum, i) => sum + i.unitPrice * i.quantity, 0,
-    );
+    const totalAmount = orderItems.reduce((sum, i) => sum + i.unitPrice! * i.quantity!, 0);
 
-    const order = this.orderRepo.create({
-      id: uuidv4(),
-      status: OrderStatus.PENDING,
-      totalAmount,
-      items: orderItems as OrderItem[],
-      userEmail: dto.userEmail ?? null,
-      address: dto.address ? JSON.stringify(dto.address) : null,
-    });
-    const saved = await this.orderRepo.save(order);
-
+    // 3. Atomically decrement stock for every item BEFORE saving the order.
+    //    If any decrement fails the order is never persisted.
     for (const item of dto.items) {
       const result = await firstValueFrom(
         this.productService.decrementStock({ productId: item.productId, quantity: item.quantity }),
       );
       if (!result.success) {
-        saved.status = OrderStatus.CANCELLED;
-        await this.orderRepo.save(saved);
-        throw new BadRequestException(`Stock decrement failed for product ${item.productId}. Order cancelled.`);
+        throw new BadRequestException(`Insufficient stock for product ${item.productId}`);
       }
     }
 
-    return saved;
+    // 4. All stock reserved — persist the order
+    const order = this.orderRepo.create({
+      id:          uuidv4(),
+      status:      OrderStatus.PENDING,
+      totalAmount,
+      items:       orderItems as OrderItem[],
+      userEmail:   dto.userEmail ?? null,
+      address:     dto.address ? JSON.stringify(dto.address) : null,
+    });
+
+    return this.orderRepo.save(order);
   }
 
-  async findAll(): Promise<any[]> {
-    const orders = await this.orderRepo.find();
-    const productIds = [...new Set(orders.flatMap(o => o.items.map(i => i.productId)))];
+  async findAll(userEmail?: string): Promise<any[]> {
+    const orders = await this.orderRepo.find({
+      where: userEmail ? { userEmail } : {},
+      order: { createdAt: 'DESC' },
+      take: 50,
+    });
 
+    const productIds = [...new Set(orders.flatMap(o => o.items.map(i => i.productId)))];
     if (productIds.length === 0) return orders;
 
     const { products } = await firstValueFrom(

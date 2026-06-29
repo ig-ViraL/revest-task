@@ -4,7 +4,8 @@
   "workspaces": ["packages/*"],
   "scripts": {
     "dev": "npm run build:product && npm run build:order && concurrently -n product,order,client -c blue,green,cyan \"node packages/product-service/dist/main.js\" \"node packages/order-service/dist/main.js\" \"npm run dev -w client\"",
-    "build": "npm run build -w product-service && npm run build -w order-service && npm run build -w client",
+    "build": "npm run build -w product-service && npm run build -w order-service && npm run build -w client && npm run seed",
+    "start": "concurrently -n product,order,client -c blue,green,cyan \"node packages/product-service/dist/main.js\" \"node packages/order-service/dist/main.js\" \"npm run start -w client\"",
     "build:product": "npm run build -w product-service",
     "build:order": "npm run build -w order-service",
     "build:client": "npm run build -w client",

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, HttpCode, HttpStatus } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
@@ -13,8 +13,8 @@ export class OrdersController {
   }
 
   @Get()
-  findAll() {
-    return this.service.findAll();
+  findAll(@Query('userEmail') userEmail?: string) {
+    return this.service.findAll(userEmail);
   }
 
   @Get(':id')

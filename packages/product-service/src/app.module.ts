@@ -10,7 +10,7 @@ import { Product } from './products/entities/product.entity';
       type: 'better-sqlite3',
       database: process.env.DB_PATH ?? join(__dirname, '../product.sqlite'),
       entities: [Product],
-      synchronize: true,
+      synchronize: process.env.NODE_ENV !== 'production',
     }),
     ProductsModule,
   ],

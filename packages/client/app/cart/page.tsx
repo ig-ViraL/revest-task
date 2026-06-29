@@ -13,24 +13,9 @@ import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import { toast } from 'react-toastify';
 import { useCart } from '@/contexts/CartContext';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
-import { Address } from '@/types';
+import { useAddresses } from '@/hooks/useAddresses';
 import { api } from '@/lib/api';
-import { v4 as uuidv4 } from 'uuid';
-
-const ADDRESS_KEY = 'revest_addresses';
-
-function loadAddresses(userEmail: string): Address[] {
-  try {
-    const all = JSON.parse(localStorage.getItem(ADDRESS_KEY) ?? '{}');
-    return all[userEmail] ?? [];
-  } catch { return []; }
-}
-function saveAddresses(userEmail: string, addresses: Address[]) {
-  try {
-    const all = JSON.parse(localStorage.getItem(ADDRESS_KEY) ?? '{}');
-    localStorage.setItem(ADDRESS_KEY, JSON.stringify({ ...all, [userEmail]: addresses }));
-  } catch {}
-}
+import { Address } from '@/types';
 
 const emptyAddr = (): Omit<Address, 'id'> => ({ line1: '', line2: '', landmark: '', city: '', state: '', pincode: '' });
 
@@ -38,21 +23,22 @@ export default function CartPage() {
   const { items, removeItem, updateQty, clearCart, total, count } = useCart();
   const currentUser = useRequireAuth();
   const router = useRouter();
+  const { addresses, addAddress } = useAddresses(currentUser?.email);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [placing, setPlacing] = useState(false);
-  const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddrId, setSelectedAddrId] = useState('');
   const [addingNew, setAddingNew] = useState(false);
   const [newAddr, setNewAddr] = useState(emptyAddr());
   const [addrErrors, setAddrErrors] = useState<Partial<typeof newAddr>>({});
 
   useEffect(() => {
-    if (!currentUser) return;
-    const saved = loadAddresses(currentUser.email);
-    setAddresses(saved);
-    if (saved.length) setSelectedAddrId(saved[0].id);
-    else setAddingNew(true);
-  }, [currentUser, router]);
+    if (addresses.length > 0 && !selectedAddrId) {
+      setSelectedAddrId(addresses[0].id);
+      setAddingNew(false);
+    } else if (addresses.length === 0) {
+      setAddingNew(true);
+    }
+  }, [addresses, selectedAddrId]);
 
   if (!currentUser) return null;
 
@@ -68,10 +54,7 @@ export default function CartPage() {
 
   const saveNewAddress = () => {
     if (!validateAddr()) return;
-    const addr: Address = { ...newAddr, id: uuidv4() };
-    const updated = [...addresses, addr];
-    saveAddresses(currentUser.email, updated);
-    setAddresses(updated);
+    const addr = addAddress(newAddr);
     setSelectedAddrId(addr.id);
     setAddingNew(false);
     setNewAddr(emptyAddr());

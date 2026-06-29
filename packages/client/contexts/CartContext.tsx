@@ -20,7 +20,7 @@ function loadCart(): CartItem[] {
   try { return JSON.parse(localStorage.getItem(CART_KEY) ?? '[]'); } catch { return []; }
 }
 function saveCart(items: CartItem[]) {
-  localStorage.setItem(CART_KEY, JSON.stringify(items));
+  try { localStorage.setItem(CART_KEY, JSON.stringify(items)); } catch {}
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
@@ -28,31 +28,32 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => { setItems(loadCart()); }, []);
 
-  const setAndSave = useCallback((next: CartItem[]) => {
-    saveCart(next);
-    setItems(next);
+  const mutate = useCallback((updater: (prev: CartItem[]) => CartItem[]) => {
+    setItems(prev => {
+      const next = updater(prev);
+      saveCart(next);
+      return next;
+    });
   }, []);
 
   const addItem = useCallback((item: Omit<CartItem, 'quantity'>) => {
-    setAndSave(
-      (prev => {
-        const existing = prev.find(i => i.productId === item.productId);
-        if (existing) return prev.map(i => i.productId === item.productId ? { ...i, quantity: i.quantity + 1 } : i);
-        return [...prev, { ...item, quantity: 1 }];
-      })(loadCart())
-    );
-  }, [setAndSave]);
+    mutate(prev => {
+      const existing = prev.find(i => i.productId === item.productId);
+      if (existing) return prev.map(i => i.productId === item.productId ? { ...i, quantity: i.quantity + 1 } : i);
+      return [...prev, { ...item, quantity: 1 }];
+    });
+  }, [mutate]);
 
   const removeItem = useCallback((productId: string) => {
-    setAndSave(loadCart().filter(i => i.productId !== productId));
-  }, [setAndSave]);
+    mutate(prev => prev.filter(i => i.productId !== productId));
+  }, [mutate]);
 
   const updateQty = useCallback((productId: string, quantity: number) => {
     if (quantity <= 0) { removeItem(productId); return; }
-    setAndSave(loadCart().map(i => i.productId === productId ? { ...i, quantity } : i));
-  }, [setAndSave, removeItem]);
+    mutate(prev => prev.map(i => i.productId === productId ? { ...i, quantity } : i));
+  }, [mutate, removeItem]);
 
-  const clearCart = useCallback(() => { setAndSave([]); }, [setAndSave]);
+  const clearCart = useCallback(() => { mutate(() => []); }, [mutate]);
 
   const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const count = items.reduce((sum, i) => sum + i.quantity, 0);

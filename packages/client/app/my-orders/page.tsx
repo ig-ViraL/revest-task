@@ -10,6 +10,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { api } from '@/lib/api';
+import { Order, OrderItem } from '@/types';
 
 const STATUS_COLOR: Record<string, 'default' | 'warning' | 'info' | 'success' | 'error'> = {
   PENDING: 'warning',
@@ -22,15 +23,13 @@ const STATUS_COLOR: Record<string, 'default' | 'warning' | 'info' | 'success' | 
 export default function MyOrdersPage() {
   const currentUser = useRequireAuth();
   const router = useRouter();
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadOrders = useCallback(async () => {
     if (!currentUser) return;
     try {
-      const all = await api.orders.list();
-      const mine = all.filter((o: any) => o.userEmail === currentUser.email);
-      setOrders(mine.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+      setOrders(await api.orders.list(currentUser.email));
     } catch (e) {
       console.error(e);
     } finally {
@@ -93,7 +92,7 @@ export default function MyOrdersPage() {
                 </AccordionSummary>
                 <AccordionDetails sx={{ px: 0 }}>
                   <Stack spacing={1}>
-                    {order.items?.map((item: any) => (
+                    {order.items?.map((item: OrderItem) => (
                       <Box key={item.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                         <Avatar
                           variant="rounded"

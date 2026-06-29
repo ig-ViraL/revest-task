@@ -41,7 +41,7 @@ export function Navbar() {
           href="/home"
           sx={{ flexGrow: 1, color: 'primary.main', fontWeight: 700, textDecoration: 'none', letterSpacing: -0.5 }}
         >
-          Revest
+          revest.shop
         </Typography>
 
         <Tooltip title="Cart">

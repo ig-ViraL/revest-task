@@ -1,3 +1,5 @@
+import { Product, Order } from '@/types';
+
 const BASE = '';
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
@@ -14,17 +16,24 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   products: {
-    list:   ()               => request<any[]>('/api/products'),
-    get:    (id: string)     => request<any>(`/api/products/${id}`),
-    create: (body: unknown)  => request<any>('/api/products', { method: 'POST', body: JSON.stringify(body) }),
-    update: (id: string, body: unknown) => request<any>(`/api/products/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
-    delete: (id: string)     => request<null>(`/api/products/${id}`, { method: 'DELETE' }),
+    list: (params?: Record<string, string>) => {
+      const qs = params ? new URLSearchParams(params).toString() : '';
+      return request<Product[]>(`/api/products${qs ? `?${qs}` : ''}`);
+    },
+    categories: () => request<string[]>('/api/products/categories'),
+    get:    (id: string)            => request<Product>(`/api/products/${id}`),
+    create: (body: Partial<Product>) => request<Product>('/api/products', { method: 'POST', body: JSON.stringify(body) }),
+    update: (id: string, body: Partial<Product>) => request<Product>(`/api/products/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+    delete: (id: string)            => request<null>(`/api/products/${id}`, { method: 'DELETE' }),
   },
   orders: {
-    list:         ()               => request<any[]>('/api/orders'),
-    get:          (id: string)     => request<any>(`/api/orders/${id}`),
-    create:       (body: unknown)  => request<any>('/api/orders', { method: 'POST', body: JSON.stringify(body) }),
-    updateStatus: (id: string, status: string) => request<any>(`/api/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+    list:   (userEmail?: string) => {
+      const qs = userEmail ? `?userEmail=${encodeURIComponent(userEmail)}` : '';
+      return request<Order[]>(`/api/orders${qs}`);
+    },
+    get:          (id: string)     => request<Order>(`/api/orders/${id}`),
+    create:       (body: unknown)  => request<Order>('/api/orders', { method: 'POST', body: JSON.stringify(body) }),
+    updateStatus: (id: string, status: string) => request<Order>(`/api/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
     cancel:       (id: string)     => request<null>(`/api/orders/${id}`, { method: 'DELETE' }),
   },
 };
