@@ -1,0 +1,14 @@
+import { NextRequest, NextResponse } from 'next/server';
+
+const base = (id: string) => `http://localhost:3002/orders/${id}`;
+
+export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
+  const res = await fetch(base(params.id), { cache: 'no-store' });
+  const data = await res.json();
+  return NextResponse.json(data, { status: res.status });
+}
+
+export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
+  const res = await fetch(base(params.id), { method: 'DELETE' });
+  return new NextResponse(null, { status: res.status });
+}
