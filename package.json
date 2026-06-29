@@ -3,8 +3,16 @@
   "private": true,
   "workspaces": ["packages/*"],
   "scripts": {
-    "dev": "concurrently \"npm run dev -w product-service\" \"npm run dev -w order-service\" \"npm run dev -w client\"",
-    "build": "npm run build -w product-service && npm run build -w order-service && npm run build -w client"
+    "dev": "concurrently -n product,order,client -c blue,green,cyan \"node packages/product-service/dist/main.js\" \"node packages/order-service/dist/main.js\" \"npm run dev -w client\"",
+    "build": "npm run build -w product-service && npm run build -w order-service && npm run build -w client",
+    "build:product": "npm run build -w product-service",
+    "build:order": "npm run build -w order-service",
+    "build:client": "npm run build -w client",
+    "dev:product": "node packages/product-service/dist/main.js",
+    "dev:order": "node packages/order-service/dist/main.js",
+    "dev:client": "npm run dev -w client",
+    "watch:product": "npm run dev -w product-service",
+    "watch:order": "npm run dev -w order-service"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
