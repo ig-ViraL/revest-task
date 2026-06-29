@@ -1,8 +1,7 @@
 'use client';
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
-import { Box, Button, Stack, Alert, Snackbar } from '@mui/material';
-import { useState } from 'react';
+import { Box, Button, Stack } from '@mui/material';
 import { FieldConfig, FormValues } from '@/types/form';
 import { DynamicField } from './DynamicField';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
@@ -11,6 +10,9 @@ interface Props {
   formId: string;
   fields: FieldConfig[];
   onSubmit?: (data: FormValues) => void;
+  submitLabel?: string;
+  hideReset?: boolean;
+  initialValues?: FormValues;
 }
 
 function buildDefaultValues(fields: FieldConfig[]): FormValues {
@@ -19,19 +21,28 @@ function buildDefaultValues(fields: FieldConfig[]): FormValues {
   );
 }
 
-export const DynamicForm = memo(function DynamicForm({ formId, fields, onSubmit }: Props) {
+export const DynamicForm = memo(function DynamicForm({
+  formId, fields, onSubmit, submitLabel = 'Submit', hideReset = false, initialValues,
+}: Props) {
   const storageKey = `form_${formId}`;
   const [saved, setSaved, clearSaved] = useLocalStorage<FormValues>(storageKey, {});
-  const [success, setSuccess] = useState(false);
 
   const defaultValues = useMemo(
-    () => ({ ...buildDefaultValues(fields), ...saved }),
+    () => ({ ...buildDefaultValues(fields), ...saved, ...initialValues }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [formId]
   );
 
   const methods = useForm<FormValues>({ defaultValues });
   const { handleSubmit, watch, reset } = methods;
+
+  // Re-populate when initialValues change (e.g. profile loaded from auth)
+  useEffect(() => {
+    if (initialValues && Object.keys(initialValues).length > 0) {
+      reset({ ...buildDefaultValues(fields), ...initialValues });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(initialValues)]);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   useEffect(() => {
@@ -43,10 +54,8 @@ export const DynamicForm = memo(function DynamicForm({ formId, fields, onSubmit 
   }, [watch, setSaved]);
 
   const handleFormSubmit = useCallback((data: FormValues) => {
-    setSaved(data);
-    setSuccess(true);
     onSubmit?.(data);
-  }, [setSaved, onSubmit]);
+  }, [onSubmit]);
 
   const handleReset = useCallback(() => {
     clearSaved();
@@ -56,19 +65,18 @@ export const DynamicForm = memo(function DynamicForm({ formId, fields, onSubmit 
   return (
     <FormProvider {...methods}>
       <Box component="form" onSubmit={handleSubmit(handleFormSubmit)} noValidate>
-        <Stack spacing={3}>
+        <Stack spacing={2.5}>
           {fields.map(field => (
             <DynamicField key={field.id} field={field} />
           ))}
           <Stack direction="row" spacing={2}>
-            <Button type="submit" variant="contained" size="large">Submit</Button>
-            <Button type="button" variant="outlined" onClick={handleReset}>Reset</Button>
+            <Button type="submit" variant="contained" size="large" fullWidth>{submitLabel}</Button>
+            {!hideReset && (
+              <Button type="button" variant="outlined" onClick={handleReset}>Reset</Button>
+            )}
           </Stack>
         </Stack>
       </Box>
-      <Snackbar open={success} autoHideDuration={3000} onClose={() => setSuccess(false)}>
-        <Alert severity="success">Form submitted and saved!</Alert>
-      </Snackbar>
     </FormProvider>
   );
 });

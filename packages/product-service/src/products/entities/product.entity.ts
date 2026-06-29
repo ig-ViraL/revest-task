@@ -29,7 +29,7 @@ export class Product {
   @Column({ default: 0 })
   stock: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'text', nullable: true })
   imageUrl: string;
 
   @Column({ default: true })

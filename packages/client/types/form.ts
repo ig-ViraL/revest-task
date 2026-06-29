@@ -11,9 +11,9 @@ export interface FieldConfig {
   min?: number;
   max?: number;
   rows?: number;
-  defaultValue?: string;
   required: boolean;
   listOfValues1?: string[];
+  defaultValue?: string;
 }
 
 export type FormValues = Record<string, unknown>;

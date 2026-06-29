@@ -24,6 +24,12 @@ export class Order {
   @Column('decimal', { precision: 10, scale: 2 })
   totalAmount: number;
 
+  @Column({ nullable: true })
+  userEmail: string;
+
+  @Column({ type: 'text', nullable: true })
+  address: string;
+
   @OneToMany(() => OrderItem, item => item.order, { cascade: true, eager: true })
   items: OrderItem[];
 

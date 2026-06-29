@@ -1,10 +1,11 @@
 import { memo, useMemo } from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
-import { FormControl, InputLabel, Select, MenuItem, Chip, Box, FormHelperText } from '@mui/material';
+import { FormControl, InputLabel, Select, MenuItem, FormHelperText, Chip, Box, OutlinedInput } from '@mui/material';
 import { FieldConfig } from '@/types/form';
 
 export const MultiSelectFieldRenderer = memo(function MultiSelectFieldRenderer({ field }: { field: FieldConfig }) {
   const { control } = useFormContext();
+  const options = field.listOfValues1 ?? [];
   const rules = useMemo(() => ({
     required: field.required ? `${field.name} is required` : false,
   }), [field.required, field.name]);
@@ -12,16 +13,20 @@ export const MultiSelectFieldRenderer = memo(function MultiSelectFieldRenderer({
   return (
     <Controller name={String(field.id)} control={control} defaultValue={[]} rules={rules}
       render={({ field: f, fieldState }) => (
-        <FormControl fullWidth error={!!fieldState.error} required={field.required}>
+        <FormControl fullWidth required={field.required} error={!!fieldState.error}>
           <InputLabel>{field.name}</InputLabel>
-          <Select {...f} multiple label={field.name}
-            renderValue={(selected: unknown) => (
+          <Select
+            {...f}
+            multiple
+            input={<OutlinedInput label={field.name} />}
+            renderValue={(selected) => (
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                 {(selected as string[]).map(v => <Chip key={v} label={v} size="small" />)}
               </Box>
-            )}>
-            {(field.listOfValues1 ?? []).map(val => (
-              <MenuItem key={val} value={val}>{val}</MenuItem>
+            )}
+          >
+            {options.map(opt => (
+              <MenuItem key={opt} value={opt}>{opt}</MenuItem>
             ))}
           </Select>
           {fieldState.error && <FormHelperText>{fieldState.error.message}</FormHelperText>}

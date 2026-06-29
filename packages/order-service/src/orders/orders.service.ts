@@ -70,6 +70,8 @@ export class OrdersService implements OnModuleInit {
       status: OrderStatus.PENDING,
       totalAmount,
       items: orderItems as OrderItem[],
+      userEmail: dto.userEmail ?? null,
+      address: dto.address ? JSON.stringify(dto.address) : null,
     });
     const saved = await this.orderRepo.save(order);
 

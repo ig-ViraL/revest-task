@@ -1,22 +1,48 @@
-import { memo, useMemo } from 'react';
+import { memo } from 'react';
 import { useFormContext, Controller } from 'react-hook-form';
-import { FormControl, FormControlLabel, Checkbox, FormHelperText } from '@mui/material';
+import { FormControl, FormLabel, FormGroup, FormControlLabel, Checkbox, FormHelperText } from '@mui/material';
 import { FieldConfig } from '@/types/form';
 
 export const CheckboxFieldRenderer = memo(function CheckboxFieldRenderer({ field }: { field: FieldConfig }) {
   const { control } = useFormContext();
-  const rules = useMemo(() => ({
-    required: field.required ? `${field.name} must be checked` : false,
-  }), [field.required, field.name]);
+  const options = field.listOfValues1 ?? [];
+
+  if (options.length === 0) {
+    return (
+      <Controller name={String(field.id)} control={control}
+        render={({ field: f }) => (
+          <FormControlLabel
+            control={<Checkbox {...f} checked={!!f.value} />}
+            label={field.name}
+          />
+        )}
+      />
+    );
+  }
 
   return (
-    <Controller name={String(field.id)} control={control} defaultValue={false} rules={rules}
+    <Controller name={String(field.id)} control={control} defaultValue={[]}
+      rules={{ required: field.required ? `${field.name} is required` : false }}
       render={({ field: f, fieldState }) => (
-        <FormControl error={!!fieldState.error}>
-          <FormControlLabel
-            label={field.name}
-            control={<Checkbox {...f} checked={!!f.value} onChange={e => f.onChange(e.target.checked)} />}
-          />
+        <FormControl component="fieldset" error={!!fieldState.error} required={field.required}>
+          <FormLabel component="legend">{field.name}</FormLabel>
+          <FormGroup>
+            {options.map(opt => (
+              <FormControlLabel
+                key={opt}
+                label={opt}
+                control={
+                  <Checkbox
+                    checked={(f.value as string[] ?? []).includes(opt)}
+                    onChange={e => {
+                      const current = (f.value as string[] ?? []);
+                      f.onChange(e.target.checked ? [...current, opt] : current.filter(v => v !== opt));
+                    }}
+                  />
+                }
+              />
+            ))}
+          </FormGroup>
           {fieldState.error && <FormHelperText>{fieldState.error.message}</FormHelperText>}
         </FormControl>
       )}
