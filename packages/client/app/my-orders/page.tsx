@@ -8,6 +8,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ShoppingBagIcon from '@mui/icons-material/ShoppingBag';
+import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import { useRequireAuth } from '@/hooks/useRequireAuth';
 import { api } from '@/lib/api';
 import { Order, OrderItem } from '@/types';
@@ -58,8 +59,22 @@ export default function MyOrdersPage() {
 
   return (
     <Box>
-      <Typography variant="h4" fontWeight={700} gutterBottom>My Orders</Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>{orders.length} order{orders.length !== 1 ? 's' : ''}</Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+        <Box>
+          <Typography variant="h4" fontWeight={700}>My Orders</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>{orders.length} order{orders.length !== 1 ? 's' : ''}</Typography>
+        </Box>
+        <Button
+          variant="contained"
+          startIcon={<AddShoppingCartIcon />}
+          onClick={() => router.push('/home')}
+          sx={{ mt: 0.5 }}
+        >
+          Place New Order
+        </Button>
+      </Box>
+
+      <Divider sx={{ mb: 3 }} />
 
       <Stack spacing={2}>
         {orders.map(order => (

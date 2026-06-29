@@ -70,6 +70,24 @@ The order-service calls product-service over **gRPC** to check stock availabilit
 
 ---
 
+## Architecture Decisions
+
+| Area | Decision | Rationale |
+|------|----------|-----------|
+| Inter-service communication | gRPC | Strongly typed contracts, binary protocol, demonstrates microservice patterns |
+| gRPC surface | Read/validate only + `DecrementStock` | Mutations stay REST — gRPC is an internal contract, not a public API mirror |
+| N+1 prevention | `GetProductsByIds` batch RPC | 100 orders → 1 gRPC call, not 100 |
+| Price integrity | `unitPrice` snapshot in `order_items` | Price changes must not retroactively alter historical orders |
+| Database | SQLite + TypeORM (one file per service) | Zero infrastructure locally; TypeORM makes it PostgreSQL-ready with a one-line config change |
+| Project structure | Monorepo (npm workspaces) | Single `npm install`, one `npm run dev` starts all three services |
+| Frontend ↔ backend | Next.js API routes as BFF proxy | Browsers can't do native gRPC; BFF hides service topology and eliminates CORS |
+| Form engine | JSON-driven field renderers | Open/Closed: new field type = one file added, nothing else changes |
+| IDs | UUID v4 | Globally unique across services — no coordination needed |
+| Deletes | Soft-delete only (`isActive` flag) | Preserves audit trail; referenced products in existing orders remain resolvable |
+| Stock decrement | Conditional `UPDATE … WHERE stock >= qty` | Atomic — eliminates race condition and oversell without a transaction lock |
+
+---
+
 ## Project Structure
 
 ```
