@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import {
   AppBar, Toolbar, Typography, IconButton, Badge,
   Avatar, Menu, MenuItem, Divider, Box, Tooltip,
@@ -14,9 +14,10 @@ export function Navbar() {
   const { currentUser, logout } = useAuth();
   const { count } = useCart();
   const router = useRouter();
+  const pathname = usePathname();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  if (!currentUser) return null; // undefined (loading) or null (not logged in) — hide navbar
+  if (!currentUser || pathname === '/products') return null;
 
   const initials = currentUser.name
     .split(' ')

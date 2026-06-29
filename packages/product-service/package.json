@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "nest start --watch",
     "build": "nest build",
-    "start": "node dist/main"
+    "start": "node dist/main",
+    "seed": "ts-node src/seed.ts"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.10.6",

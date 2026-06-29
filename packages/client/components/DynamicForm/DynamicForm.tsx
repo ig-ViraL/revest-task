@@ -55,7 +55,9 @@ export const DynamicForm = memo(function DynamicForm({
 
   const handleFormSubmit = useCallback((data: FormValues) => {
     onSubmit?.(data);
-  }, [onSubmit]);
+    clearSaved();
+    reset(buildDefaultValues(fields));
+  }, [onSubmit, clearSaved, reset, fields]);
 
   const handleReset = useCallback(() => {
     clearSaved();

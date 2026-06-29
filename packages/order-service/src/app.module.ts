@@ -21,7 +21,7 @@ import { OrderItem } from './orders/entities/order-item.entity';
         options: {
           package: 'product',
           protoPath: join(__dirname, '../../../proto/product.proto'),
-          url: 'localhost:50051',
+          url: process.env.PRODUCT_GRPC_URL ?? 'localhost:50051',
         },
       },
     ]),

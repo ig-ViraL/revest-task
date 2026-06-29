@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ORDER_SERVICE_URL } from '@/config/services';
 
-const base = (id: string) => `http://localhost:3002/orders/${id}`;
+const base = (id: string) => `${ORDER_SERVICE_URL}/orders/${id}`;
 
 export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
   const res = await fetch(base(params.id), { cache: 'no-store' });

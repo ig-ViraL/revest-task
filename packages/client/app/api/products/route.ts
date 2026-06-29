@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { PRODUCT_SERVICE_URL } from '@/config/services';
 
-const PRODUCT_URL = 'http://localhost:3001/products';
+const PRODUCT_URL = `${PRODUCT_SERVICE_URL}/products`;
 
 export async function GET() {
   const res = await fetch(PRODUCT_URL, { cache: 'no-store' });

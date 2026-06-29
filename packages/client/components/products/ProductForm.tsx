@@ -27,7 +27,7 @@ export const ProductForm = memo(function ProductForm({ open, product, onClose, o
     reset(product ?? {});
     setPreview(product?.imageUrl ?? '');
     setImgTab(product?.imageUrl?.startsWith('data:') ? 0 : 1);
-  }, [product, reset]);
+  }, [open, product, reset]);
 
   useEffect(() => {
     if (imgTab === 1) setPreview(imageUrl ?? '');
@@ -92,6 +92,7 @@ export const ProductForm = memo(function ProductForm({ open, product, onClose, o
               multiline
               rows={2}
               size="small"
+              helperText=" "
               {...register('description')}
             />
 
@@ -127,6 +128,7 @@ export const ProductForm = memo(function ProductForm({ open, product, onClose, o
               fullWidth
               size="small"
               placeholder="e.g. Electronics, Groceries"
+              helperText=" "
               {...register('category')}
             />
 

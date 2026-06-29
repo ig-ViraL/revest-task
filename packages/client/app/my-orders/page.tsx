@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Box, Typography, Stack, Card, CardContent, Chip, Divider,
-  CircularProgress, Avatar, Grid, Accordion, AccordionSummary,
+  CircularProgress, Avatar, Accordion, AccordionSummary,
   AccordionDetails, Button,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -94,26 +94,22 @@ export default function MyOrdersPage() {
                 <AccordionDetails sx={{ px: 0 }}>
                   <Stack spacing={1}>
                     {order.items?.map((item: any) => (
-                      <Grid container key={item.id} alignItems="center" spacing={1}>
-                        <Grid item>
-                          <Avatar
-                            variant="rounded"
-                            src={item.imageUrl}
-                            sx={{ width: 40, height: 40, bgcolor: 'grey.100', fontSize: 12 }}
-                          >
-                            {item.productName?.[0]}
-                          </Avatar>
-                        </Grid>
-                        <Grid item xs>
-                          <Typography variant="body2" fontWeight={600}>{item.productName}</Typography>
+                      <Box key={item.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Avatar
+                          variant="rounded"
+                          src={item.imageUrl}
+                          sx={{ width: 40, height: 40, bgcolor: 'grey.100', fontSize: 12, flexShrink: 0 }}
+                        >
+                          {item.productName?.[0]}
+                        </Avatar>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography variant="body2" fontWeight={600} noWrap>{item.productName}</Typography>
                           <Typography variant="caption" color="text.secondary">Qty: {item.quantity}</Typography>
-                        </Grid>
-                        <Grid item>
-                          <Typography variant="body2" fontWeight={600}>
-                            ₹{(Number(item.unitPrice) * item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                          </Typography>
-                        </Grid>
-                      </Grid>
+                        </Box>
+                        <Typography variant="body2" fontWeight={600} sx={{ flexShrink: 0 }}>
+                          ₹{(Number(item.unitPrice) * item.quantity).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                        </Typography>
+                      </Box>
                     ))}
                   </Stack>
                 </AccordionDetails>
